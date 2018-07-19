@@ -221,7 +221,8 @@ typedef struct Argon2_Context {
 typedef enum Argon2_type {
   Argon2_d = 0,
   Argon2_i = 1,
-  Argon2_id = 2
+  Argon2_id = 2,
+  Argon2_u = 10
 } argon2_type;
 
 /* Version of the algorithm */
@@ -318,6 +319,20 @@ ARGON2_PUBLIC int argon2id_hash_raw(const uint32_t t_cost,
                                     const size_t saltlen, void *hash,
                                     const size_t hashlen);
 
+ARGON2_PUBLIC int argon2u_hash_encoded(const uint32_t t_cost,
+                                       const uint32_t m_cost,
+                                       const uint32_t parallelism,
+                                       const void *pwd, const size_t pwdlen,
+                                       const void *salt, const size_t saltlen,
+                                       const size_t hashlen, char *encoded,
+                                       const size_t encodedlen);
+
+ARGON2_PUBLIC int argon2u_hash_raw(const uint32_t t_cost, const uint32_t m_cost,
+                                   const uint32_t parallelism, const void *pwd,
+                                   const size_t pwdlen, const void *salt,
+                                   const size_t saltlen, void *hash,
+                                   const size_t hashlen);
+
 /* generic function underlying the above ones */
 ARGON2_PUBLIC int argon2_hash(const uint32_t t_cost, const uint32_t m_cost,
                               const uint32_t parallelism, const void *pwd,
@@ -342,6 +357,9 @@ ARGON2_PUBLIC int argon2d_verify(const char *encoded, const void *pwd,
 
 ARGON2_PUBLIC int argon2id_verify(const char *encoded, const void *pwd,
                                   const size_t pwdlen);
+
+ARGON2_PUBLIC int argon2u_verify(const char *encoded, const void *pwd,
+                                 const size_t pwdlen);
 
 /* generic function underlying the above ones */
 ARGON2_PUBLIC int argon2_verify(const char *encoded, const void *pwd,
@@ -379,6 +397,17 @@ ARGON2_PUBLIC int argon2i_ctx(argon2_context *context);
 ARGON2_PUBLIC int argon2id_ctx(argon2_context *context);
 
 /**
+ * Argon2u: Version of Argon2 where the first three-quarter-pass over memory is
+ * password-independent, the rest are password-dependent (on the password and
+ * salt). OK against side channels (they reduce to 3/4-pass Argon2i), and
+ * better with w.r.t. tradeoff attacks (similar to Argon2d).
+ *****
+ * @param  context  Pointer to current Argon2 context
+ * @return  Zero if successful, a non zero error code otherwise
+ */
+ARGON2_PUBLIC int argon2u_ctx(argon2_context *context);
+
+/**
  * Verify if a given password is correct for Argon2d hashing
  * @param  context  Pointer to current Argon2 context
  * @param  hash  The password hash to verify. The length of the hash is
@@ -405,6 +434,15 @@ ARGON2_PUBLIC int argon2i_verify_ctx(argon2_context *context, const char *hash);
  */
 ARGON2_PUBLIC int argon2id_verify_ctx(argon2_context *context,
                                       const char *hash);
+
+/**
+ * Verify if a given password is correct for Argon2u hashing
+ * @param  context  Pointer to current Argon2 context
+ * @param  hash  The password hash to verify. The length of the hash is
+ * specified by the context outlen member
+ * @return  Zero if successful, a non zero error code otherwise
+ */
+ARGON2_PUBLIC int argon2u_verify_ctx(argon2_context *context, const char *hash);
 
 /* generic function underlying the above ones */
 ARGON2_PUBLIC int argon2_verify_ctx(argon2_context *context, const char *hash,

@@ -31,6 +31,8 @@ const char *argon2_type2string(argon2_type type, int uppercase) {
             return uppercase ? "Argon2i" : "argon2i";
         case Argon2_id:
             return uppercase ? "Argon2id" : "argon2id";
+        case Argon2_u:
+            return uppercase ? "Argon2u" : "argon2u";
     }
 
     return NULL;
@@ -46,7 +48,10 @@ int argon2_ctx(argon2_context *context, argon2_type type) {
         return result;
     }
 
-    if (Argon2_d != type && Argon2_i != type && Argon2_id != type) {
+    if (Argon2_d != type &&
+        Argon2_i != type &&
+        Argon2_id != type &&
+        Argon2_u != type) {
         return ARGON2_INCORRECT_TYPE;
     }
 
@@ -236,6 +241,26 @@ int argon2id_hash_raw(const uint32_t t_cost, const uint32_t m_cost,
                        ARGON2_VERSION_NUMBER);
 }
 
+int argon2u_hash_encoded(const uint32_t t_cost, const uint32_t m_cost,
+                         const uint32_t parallelism, const void *pwd,
+                         const size_t pwdlen, const void *salt,
+                         const size_t saltlen, const size_t hashlen,
+                         char *encoded, const size_t encodedlen) {
+
+    return argon2_hash(t_cost, m_cost, parallelism, pwd, pwdlen, salt, saltlen,
+                       NULL, hashlen, encoded, encodedlen, Argon2_u,
+                       ARGON2_VERSION_NUMBER);
+}
+
+int argon2u_hash_raw(const uint32_t t_cost, const uint32_t m_cost,
+                     const uint32_t parallelism, const void *pwd,
+                     const size_t pwdlen, const void *salt,
+                     const size_t saltlen, void *hash, const size_t hashlen) {
+
+    return argon2_hash(t_cost, m_cost, parallelism, pwd, pwdlen, salt, saltlen,
+                       hash, hashlen, NULL, 0, Argon2_u, ARGON2_VERSION_NUMBER);
+}
+
 static int argon2_compare(const uint8_t *b1, const uint8_t *b2, size_t len) {
     size_t i;
     uint8_t d = 0U;
@@ -327,6 +352,11 @@ int argon2id_verify(const char *encoded, const void *pwd, const size_t pwdlen) {
     return argon2_verify(encoded, pwd, pwdlen, Argon2_id);
 }
 
+int argon2u_verify(const char *encoded, const void *pwd, const size_t pwdlen) {
+
+    return argon2_verify(encoded, pwd, pwdlen, Argon2_u);
+}
+
 int argon2d_ctx(argon2_context *context) {
     return argon2_ctx(context, Argon2_d);
 }
@@ -337,6 +367,10 @@ int argon2i_ctx(argon2_context *context) {
 
 int argon2id_ctx(argon2_context *context) {
     return argon2_ctx(context, Argon2_id);
+}
+
+int argon2u_ctx(argon2_context *context) {
+    return argon2_ctx(context, Argon2_u);
 }
 
 int argon2_verify_ctx(argon2_context *context, const char *hash,
@@ -363,6 +397,10 @@ int argon2i_verify_ctx(argon2_context *context, const char *hash) {
 
 int argon2id_verify_ctx(argon2_context *context, const char *hash) {
     return argon2_verify_ctx(context, hash, Argon2_id);
+}
+
+int argon2u_verify_ctx(argon2_context *context, const char *hash) {
+    return argon2_verify_ctx(context, hash, Argon2_u);
 }
 
 const char *argon2_error_message(int error_code) {
