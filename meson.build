@@ -15,23 +15,15 @@ endif
 
 lib_src = ['src/argon2.c',
 'src/bench.c',
-'src/blake2/blake2-impl.h',
-'src/blake2/blake2.h',
 'src/blake2/blake2b.c',
-'src/blake2/blamka-round-opt.h',
-'src/blake2/blamka-round-ref.h',
 'src/core.c',
-'src/core.h',
 'src/encoding.c',
-'src/encoding.h',
 'src/genkat.c',
-'src/genkat.h',
 'src/opt.c',
 'src/ref.c',
 'src/run.c',
 'src/test.c',
-'src/thread.c',
-'src/thread.h']
+'src/thread.c']
 
 inc = include_directories(['./include'])
 
