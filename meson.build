@@ -1,7 +1,5 @@
 project('argon2', 'c', version : '1')
 
-version = meson.project_version()
-
 legacy_meson = false
 
 detect_meson_version = run_command('meson', '--version')
@@ -27,7 +25,7 @@ lib_src = ['src/argon2.c',
 
 inc = include_directories(['./include'])
 
-lib = static_library('argon2', sources: lib_src, version: version,
+lib = static_library('argon2', sources: lib_src,
 include_directories: inc,
 c_args: ['-Wall', '-Wno-unused-value', '-Wno-unused-function'],
 install: true)
