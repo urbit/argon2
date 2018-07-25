@@ -370,6 +370,37 @@ int decode_string(argon2_context *ctx, const char *str, argon2_type type) {
 #undef BIN
 }
 
+char* itoa(int i, char b[]){
+    #ifdef ARGON2_JS
+
+    // because this generates WASM error:
+    // sprintf(tmp, "%lu", (unsigned long)(x));
+
+    char const digit[] = "0123456789";
+    char* p = b;
+    if(i<0){
+        *p++ = '-';
+        i *= -1;
+    }
+    int shifter = i;
+    do{ //Move to where representation ends
+        ++p;
+        shifter = shifter/10;
+    }while(shifter);
+    *p = '\0';
+    do{ //Move back, inserting digits as u go
+        *--p = digit[i%10];
+        i = i/10;
+    }while(i);
+    return b;
+
+    #else
+
+    sprintf(b, "%lu", (unsigned long)(i));
+
+    #endif
+}
+
 int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
                   argon2_type type) {
 #define SS(str)                                                                \
@@ -386,7 +417,7 @@ int encode_string(char *dst, size_t dst_len, argon2_context *ctx,
 #define SX(x)                                                                  \
     do {                                                                       \
         char tmp[30];                                                          \
-        sprintf(tmp, "%lu", (unsigned long)(x));                               \
+        itoa(x, tmp);                                                          \
         SS(tmp);                                                               \
     } while ((void)0, 0)
 

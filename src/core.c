@@ -96,11 +96,15 @@ int allocate_memory(const argon2_context *context, uint8_t **memory,
     }
 
     /* 2. Try to allocate with appropriate allocator */
+#ifdef ARGON2_JS
+    *memory = malloc(memory_size);
+#else
     if (context->allocate_cbk) {
         (context->allocate_cbk)(memory, memory_size);
     } else {
         *memory = malloc(memory_size);
     }
+#endif
 
     if (*memory == NULL) {
         return ARGON2_MEMORY_ALLOCATION_ERROR;
@@ -113,11 +117,15 @@ void free_memory(const argon2_context *context, uint8_t *memory,
                  size_t num, size_t size) {
     size_t memory_size = num*size;
     clear_internal_memory(memory, memory_size);
+#ifdef ARGON2_JS
+    free(memory);
+#else
     if (context->free_cbk) {
         (context->free_cbk)(memory, memory_size);
     } else {
         free(memory);
     }
+#endif
 }
 
 void NOT_OPTIMIZED secure_wipe_memory(void *v, size_t n) {
@@ -127,6 +135,8 @@ void NOT_OPTIMIZED secure_wipe_memory(void *v, size_t n) {
     memset_s(v, n, 0, n);
 #elif defined(__OpenBSD__)
     explicit_bzero(v, n);
+#elif defined(ARGON2_JS)
+    memset(v, 0, n);
 #else
     static void *(*const volatile memset_sec)(void *, int, size_t) = &memset;
     memset_sec(v, 0, n);
@@ -322,6 +332,9 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
                     instance; /* preparing the thread input */
                 memcpy(&(thr_data[l].pos), &position,
                        sizeof(argon2_position_t));
+#ifdef EMSCRIPTEN
+                fill_segment(instance, position);
+#else
                 if (argon2_thread_create(&thread[l], &fill_segment_thr,
                                          (void *)&thr_data[l])) {
                     rc = ARGON2_THREAD_FAIL;
@@ -330,6 +343,7 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
 
                 /* fill_segment(instance, position); */
                 /*Non-thread equivalent of the lines above */
+#endif
             }
 
             /* 3. Joining remaining threads */
