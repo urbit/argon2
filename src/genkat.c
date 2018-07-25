@@ -190,6 +190,8 @@ int main(int argc, char *argv[]) {
         type = Argon2_i;
     } else if (!strcmp(type_str, "id")) {
         type = Argon2_id;
+    } else if (!strcmp(type_str, "u")) {
+        type = Argon2_u;
     } else {
         fatal("wrong Argon2 type");
     }

@@ -46,6 +46,7 @@ static void usage(const char *cmd) {
     printf("\t-i\t\tUse Argon2i (this is the default)\n");
     printf("\t-d\t\tUse Argon2d instead of Argon2i\n");
     printf("\t-id\t\tUse Argon2id instead of Argon2i\n");
+    printf("\t-u\t\tUse Argon2u instead of Argon2i\n");
     printf("\t-t N\t\tSets the number of iterations to N (default = %d)\n",
            T_COST_DEF);
     printf("\t-m N\t\tSets the memory usage of 2^N KiB (default %d)\n",
@@ -292,6 +293,9 @@ int main(int argc, char *argv[]) {
             ++types_specified;
         } else if (!strcmp(a, "-id")) {
             type = Argon2_id;
+            ++types_specified;
+        } else if (!strcmp(a, "-u")) {
+            type = Argon2_u;
             ++types_specified;
         } else if (!strcmp(a, "-e")) {
             encoded_only = 1;
