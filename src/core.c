@@ -294,14 +294,28 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
     argon2_thread_data *thr_data = NULL;
     int rc = ARGON2_OK;
 
+    allocate_fptr alc = instance->context_ptr->allocate_cbk;
+    deallocate_fptr dlc = instance->context_ptr->free_cbk;
+    uint32_t las = instance->lanes * sizeof(argon2_thread_handle_t);
+
     /* 1. Allocating space for threads */
-    thread = calloc(instance->lanes, sizeof(argon2_thread_handle_t));
+    if (alc != NULL) {
+        alc((uint8_t **)&thread, las);
+        memset(thread, 0, las);
+    } else {
+        thread = calloc(instance->lanes, sizeof(argon2_thread_handle_t));
+    }
     if (thread == NULL) {
         rc = ARGON2_MEMORY_ALLOCATION_ERROR;
         goto fail;
     }
 
-    thr_data = calloc(instance->lanes, sizeof(argon2_thread_data));
+    if (alc != NULL) {
+        alc((uint8_t **)&thr_data, las);
+        memset(thr_data, 0, las);
+    } else {
+        thr_data = calloc(instance->lanes, sizeof(argon2_thread_handle_t));
+    }
     if (thr_data == NULL) {
         rc = ARGON2_MEMORY_ALLOCATION_ERROR;
         goto fail;
@@ -363,10 +377,18 @@ static int fill_memory_blocks_mt(argon2_instance_t *instance) {
 
 fail:
     if (thread != NULL) {
-        free(thread);
+        if (dlc != NULL) {
+            dlc((uint8_t *)thread, las);
+        } else {
+            free(thread);
+        }
     }
     if (thr_data != NULL) {
-        free(thr_data);
+        if (dlc != NULL) {
+            dlc((uint8_t *)thr_data, las);
+        } else {
+            free(thr_data);
+        }
     }
     return rc;
 }
