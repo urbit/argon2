@@ -27,7 +27,7 @@ inc = include_directories(['./include'])
 
 lib = static_library('argon2', sources: lib_src,
 include_directories: inc,
-c_args: ['-Wall', '-Wno-unused-value', '-Wno-unused-function'],
+c_args: ['-Wall', '-Wno-unused-value', '-Wno-unused-function', '-DARGON2_NO_THREADS'],
 install: true)
 
 argon2_dep = declare_dependency(include_directories : inc, link_with : lib)
